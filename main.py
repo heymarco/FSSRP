@@ -25,7 +25,7 @@ from fssrp import FSSRPClassifier
 
 if __name__ == '__main__':
     n_jobs = multiprocessing.cpu_count()
-    reps = 10
+    reps = 30
     n_estimators = 10
     subspace_size = "sqrt"
     stream_length = 5000
