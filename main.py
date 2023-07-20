@@ -95,4 +95,3 @@ if __name__ == '__main__':
     plt.tight_layout(pad=.5)
     plt.subplots_adjust(top=.9)
     plt.savefig(os.path.join(os.getcwd(), "figures", "results.pdf"))
-    plt.show()

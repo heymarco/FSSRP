@@ -12,3 +12,4 @@ dependencies:
   - pip:
     - parquet
     - river
+    - mrmr_selection
