@@ -1,0 +1,5 @@
+DATASET = "Dataset"
+REPETITION = "Repetition"
+APPROACH = "Approach"
+SCORE = "Score"
+METRIC = "Metric"
