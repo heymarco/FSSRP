@@ -36,30 +36,41 @@ if __name__ == '__main__':
         grace_period=grace_period, delta=delta
     )
     approaches = {
-        NoChangeClassifier: [{}],
+        NoChangeClassifier.__name__: (NoChangeClassifier, [{}]),
         # ExtremelyFastDecisionTreeClassifier: [
         #     {"grace_period": grace_period, "delta": delta}
         # ],  # DID NOT WORK...
-        HoeffdingAdaptiveTreeClassifier: [
+        "HoeffdingTree": (HoeffdingTreeClassifier, [
+            {"grace_period": grace_period, "delta": delta}
+        ]),
+        "HoeffdingAdaptiveTree": (HoeffdingAdaptiveTreeClassifier, [
             {"grace_period": grace_period, "delta": delta, "seed": np.nan}
-        ],
-        ARFClassifier: [
+        ]),
+        "AdaptiveRandomForest": (ARFClassifier, [
             {"n_models": n_estimators, "seed": np.nan}
-        ],
-        ADWINBaggingClassifier: [
+        ]),
+        "ADWINBagging": (ADWINBaggingClassifier, [
             {"model": copy.deepcopy(base_model), "n_models": n_estimators, "seed": np.nan}
-        ],
-        ADWINBoostingClassifier: [
+        ]),
+        "ADWINBoosting": (ADWINBoostingClassifier, [
             {"model": copy.deepcopy(base_model), "n_models": n_estimators, "seed": np.nan}
-        ],
-        SRPClassifier: [
+        ]),
+        "SRP (1)": (SRPClassifier, [
+            {"model": copy.deepcopy(base_model), "n_models": 1,
+             "subspace_size": subspace_size, "seed": np.nan}
+        ]),
+        "FSSRP (1)": (FSSRPClassifier, [
+            {"model": copy.deepcopy(base_model), "n_models": 1,
+             "subspace_size": subspace_size, "seed": np.nan}
+        ]),
+        "SRP": (SRPClassifier, [
             {"model": copy.deepcopy(base_model), "n_models": n_estimators,
              "subspace_size": subspace_size, "seed": np.nan}
-        ],
-        FSSRPClassifier: [
+        ]),
+        "FSSRP": (FSSRPClassifier, [
             {"model": copy.deepcopy(base_model), "n_models": n_estimators,
              "subspace_size": subspace_size, "seed": np.nan}
-        ],
+        ]),
     }
 
     metric = metrics.BalancedAccuracy()
@@ -68,7 +79,7 @@ if __name__ == '__main__':
     experiments = []
     results = []
     for ds_name, ds in get_rw_classification_datasets().items():
-        for approach, args_list in approaches.items():
+        for approach_name, (approach, args_list) in approaches.items():
             for args in args_list:
                 for rep in range(reps):
                     if "seed" in args:
@@ -77,7 +88,7 @@ if __name__ == '__main__':
                     classifier = approach(**args)
                     print(dataset, classifier, rep, metric)
                     # results.append(evaluate(dataset, classifier, rep, metric, stream_length))
-                    experiments.append([dataset, classifier, rep, metric, stream_length])
+                    experiments.append([dataset, classifier, rep, metric, stream_length, approach_name])
 
     results = run_async(evaluate, experiments, njobs=n_jobs)
     final_df = pd.DataFrame(results, columns=columns)
