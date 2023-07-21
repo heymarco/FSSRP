@@ -29,46 +29,45 @@ _rw_datasets = [
 ]
 
 
-# "Regression" - "Binary classification" - "Multi-class classification" - "Multi-output binary classification" - "Multi-output regression"
 def get_rw_binary_classification_datasets() -> Dict:
     return {
         ds.__name__: ds for ds in _rw_datasets
-        if ds().task == "Binary classification"
+        if ds().task == datasets.base.BINARY_CLF
     }
 
 
 def get_rw_classification_datasets() -> Dict:
     return {
         ds.__name__: ds for ds in _rw_datasets
-        if ds().task == "Binary classification" or ds().task == "Multi-class classification"
+        if ds().task == datasets.base.BINARY_CLF or ds().task == datasets.base.MULTI_CLF
     }
 
 
 def get_rw_regression_datasets() -> Dict:
     return {
         ds.__name__: ds for ds in _rw_datasets
-        if ds().task == "Regression"
+        if ds().task == datasets.base.REG
     }
 
 
 def get_rw_multi_class_classification_datasets() -> Dict:
     return {
         ds.__name__: ds for ds in _rw_datasets
-        if ds().task == "Multi-class classification"
+        if ds().task == datasets.base.MULTI_CLF
     }
 
 
 def get_rw_multi_output_classification_datasets() -> Dict:
     return {
         ds.__name__: ds for ds in _rw_datasets
-        if ds().task == "Multi-output binary classification"
+        if ds().task == datasets.base.MO_BINARY_CLF
     }
 
 
 def get_rw_multi_output_regression_datasets() -> Dict:
     return {
         ds.__name__: ds for ds in _rw_datasets
-        if ds().task == "Multi-output regression"
+        if ds().task == datasets.base.MO_REG
     }
 
 
