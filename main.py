@@ -28,10 +28,10 @@ if __name__ == '__main__':
     reps = 30
     n_estimators = 10
     subspace_size = "sqrt"
-    stream_length = 5000
+    stream_length = 1000
 
     grace_period = 50
-    delta = 0.01
+    delta = 0.05
     base_model = HoeffdingTreeClassifier(
         grace_period=grace_period, delta=delta
     )

@@ -14,7 +14,7 @@ _rw_datasets = [
     datasets.ImageSegments,
     datasets.Insects,
     datasets.Keystroke,
-    datasets.MaliciousURL,  # commenting out due to more than 3 million features
+    datasets.MaliciousURL,  # more than 3 million features
     datasets.MovieLens100K,
     datasets.Music,
     datasets.Phishing,

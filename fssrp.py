@@ -584,7 +584,9 @@ class FSSRPClassifier(BaseFSSRPEnsemble, base.Classifier):
                                                                    labels=np.array(self._fs_samples_y),
                                                                    n_components=self.n_models,
                                                                    relative_size=relative_size)
-        alt_feature_sets = [alt for alt in alt_feature_sets if len(alt) > 0]
+        alt_feature_sets = [alt for alt in alt_feature_sets if len(alt) > 0]  # filter empty featuresets
+        alt_feature_sets = np.sort(alt_feature_sets, axis=-1)  # sort each featureset
+        alt_feature_sets = np.unique(alt_feature_sets, axis=0).tolist()  # remove duplicates
         if len(alt_feature_sets) == 0:  # if alternative feature selection did not produce results, fall back  to random
             abs_subspace_size = int(relative_size * dims)
             alt_feature_sets = [
