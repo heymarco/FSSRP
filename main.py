@@ -7,6 +7,9 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 import seaborn as sns
+
+from transformations import drop_dates
+
 sns.set()
 
 from river import metrics
@@ -85,14 +88,14 @@ if __name__ == '__main__':
                     if "seed" in args:
                         args["seed"] = rep
                     dataset = ds()
-                    classifier = approach(**args)
+                    classifier = drop_dates | approach(**args)
                     print(dataset, classifier, rep, metric)
                     # results.append(evaluate(dataset, classifier, rep, metric, stream_length))
                     experiments.append([dataset, classifier, rep, metric, stream_length, approach_name])
 
     results = run_async(evaluate, experiments, njobs=n_jobs)
     final_df = pd.DataFrame(results, columns=columns)
-    final_df.to_parquet(os.path.join(os.getcwd(), "results", "result.parquet"))
+    final_df.to_parquet(os.path.join(os.getcwd(), "results", "results_classification.parquet"))
 
     avg_df = final_df.copy()
     avg_df[DATASET] = "Average"
@@ -105,4 +108,4 @@ if __name__ == '__main__':
     plt.xticks(rotation=30, ha="right")
     plt.tight_layout(pad=.5)
     plt.subplots_adjust(top=.85)
-    plt.savefig(os.path.join(os.getcwd(), "figures", "results.pdf"))
+    plt.savefig(os.path.join(os.getcwd(), "figures", "results_classification.pdf"))

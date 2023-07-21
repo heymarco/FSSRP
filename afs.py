@@ -31,8 +31,9 @@ def get_alternative_features_regression(data: pd.DataFrame,
         relative_size = np.sqrt(d) / d
     k = np.ceil(d * relative_size).astype(int)
     alternative_feature_sets = []
+    sample_proba = np.sqrt(data.shape[0]) / data.shape[0]
     for _ in range(n_components):
-        X_sample, y_sample = get_sample_df(data, labels, sample_proba=0.5)
+        X_sample, y_sample = get_sample_df(data, labels, sample_proba=sample_proba)
         this_fs = mrmr_regression(X_sample, y_sample, k, show_progress=False)
         alternative_feature_sets.append(this_fs)
     return alternative_feature_sets

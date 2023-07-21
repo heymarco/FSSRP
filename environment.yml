@@ -9,6 +9,7 @@ dependencies:
   - tqdm
   - pyarrow
   - fastparquet
+  - tabulate
   - pip:
     - parquet
     - river

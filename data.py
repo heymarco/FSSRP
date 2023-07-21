@@ -15,10 +15,10 @@ _rw_datasets = [
     datasets.Insects,
     datasets.Keystroke,
     datasets.MaliciousURL,  # more than 3 million features
-    datasets.MovieLens100K,
+    # datasets.MovieLens100K,
     datasets.Music,
     datasets.Phishing,
-    datasets.Restaurants,
+    # datasets.Restaurants,
     # datasets.SMSSpam,  # TODO: missing encoding
     # datasets.SMTP,  # highly imbalanced (only 0.4% positive labels)
     datasets.SolarFlare,
@@ -46,7 +46,7 @@ def get_rw_classification_datasets() -> Dict:
 def get_rw_regression_datasets() -> Dict:
     return {
         ds.__name__: ds for ds in _rw_datasets
-        if ds().task == datasets.base.REG
+        if ds().task == datasets.base.REG and ds().n_features > 1
     }
 
 
