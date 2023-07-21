@@ -99,10 +99,10 @@ if __name__ == '__main__':
     final_df = pd.concat([avg_df, final_df], ignore_index=True)
 
     g = sns.catplot(kind="bar", data=final_df, x=DATASET, y=SCORE, hue=APPROACH)
-    sns.move_legend(g, "upper center", ncol=3, title="")
+    sns.move_legend(g, "upper center", ncol=4, title="")
     plt.xlabel("")
     plt.ylabel(final_df[METRIC].iloc[0])
     plt.xticks(rotation=30, ha="right")
     plt.tight_layout(pad=.5)
-    plt.subplots_adjust(top=.9)
+    plt.subplots_adjust(top=.85)
     plt.savefig(os.path.join(os.getcwd(), "figures", "results.pdf"))
