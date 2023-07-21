@@ -407,6 +407,22 @@ def random_subspace(all_features: list, k: int, rng: random.Random):
     return rng.sample(all_features, k=k)
 
 
+def unique_featuresets(all_featuresets: list) -> list:
+    """
+    Removes empty feature sets and duplicates
+    :param all_featuresets: the list of feature sets to filter
+    :return: the unique and non-empty feature sets
+    """
+    if len(all_featuresets) == 0:
+        return all_featuresets
+    all_featuresets = [np.sort(fs).tolist() for fs in all_featuresets]
+    unique_fs = []
+    for fs in all_featuresets:
+        if fs not in unique_fs and len(fs) > 0:
+            unique_fs.append(fs)
+    return unique_fs
+
+
 class FSSRPClassifier(BaseFSSRPEnsemble, base.Classifier):
     """Streaming Random Patches ensemble classifier.
 
@@ -584,9 +600,7 @@ class FSSRPClassifier(BaseFSSRPEnsemble, base.Classifier):
                                                                    labels=np.array(self._fs_samples_y),
                                                                    n_components=self.n_models,
                                                                    relative_size=relative_size)
-        alt_feature_sets = [alt for alt in alt_feature_sets if len(alt) > 0]  # filter empty featuresets
-        alt_feature_sets = [np.sort(fs) for fs in alt_feature_sets]  # sort each featureset
-        alt_feature_sets = np.unique(alt_feature_sets, axis=0).tolist()  # remove duplicates
+        alt_feature_sets = unique_featuresets(alt_feature_sets)
         if len(alt_feature_sets) == 0:  # if alternative feature selection did not produce results, fall back  to random
             abs_subspace_size = int(relative_size * dims)
             alt_feature_sets = [

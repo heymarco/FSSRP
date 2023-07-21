@@ -20,7 +20,7 @@ _rw_datasets = [
     datasets.Phishing,
     datasets.Restaurants,
     # datasets.SMSSpam,  # TODO: missing encoding
-    datasets.SMTP,
+    # datasets.SMTP,  # highly imbalanced (only 0.4% positive labels)
     datasets.SolarFlare,
     # datasets.TREC07,  # error loading dataset
     datasets.Taxis,
