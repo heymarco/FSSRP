@@ -1,10 +1,11 @@
 from typing import Dict
 
 from river import datasets
+from river.datasets import synth
 
 _rw_datasets = [
     datasets.AirlinePassengers,
-    datasets.Bananas,
+    # datasets.Bananas,  # only 2 features
     datasets.Bikes,
     datasets.ChickWeights,
     datasets.CreditCard,
@@ -14,7 +15,7 @@ _rw_datasets = [
     datasets.ImageSegments,
     datasets.Insects,
     datasets.Keystroke,
-    datasets.MaliciousURL,  # more than 3 million features
+    # datasets.MaliciousURL,  # more than 3 million features
     # datasets.MovieLens100K,
     datasets.Music,
     datasets.Phishing,
@@ -23,9 +24,31 @@ _rw_datasets = [
     # datasets.SMTP,  # highly imbalanced (only 0.4% positive labels)
     datasets.SolarFlare,
     # datasets.TREC07,  # error loading dataset
-    datasets.Taxis,
+    # datasets.Taxis,  # contains outliers, I think.
     datasets.TrumpApproval,
     datasets.WaterFlow
+]
+
+_syn_datasets = [
+    synth.Agrawal,
+    synth.AnomalySine,
+    synth.ConceptDriftStream,
+    synth.Friedman,
+    synth.FriedmanDrift,
+    synth.Hyperplane,
+    synth.LED,
+    synth.LEDDrift,
+    synth.Logical,
+    synth.Mixed,
+    synth.Mv,
+    synth.Planes2D,
+    synth.RandomRBF,
+    synth.RandomRBFDrift,
+    synth.RandomTree,
+    synth.SEA,
+    synth.STAGGER,
+    synth.Sine,
+    synth.Waveform
 ]
 
 

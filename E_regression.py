@@ -14,19 +14,19 @@ from river.dummy import StatisticRegressor
 from river.ensemble import SRPRegressor, BaggingRegressor, EWARegressor
 from river.forest import ARFRegressor
 from river.tree import HoeffdingTreeRegressor, HoeffdingAdaptiveTreeRegressor
-from river.preprocessing import StandardScaler, TargetStandardScaler
+from river.preprocessing import StandardScaler, TargetStandardScaler, TargetMinMaxScaler
 
 from data import get_rw_classification_datasets, get_rw_binary_classification_datasets, get_rw_regression_datasets
 from util import run_async
 from evaluate import evaluate
 from macros import *
-from transformations import drop_dates, drop_categorical, target_scaler
+from transformations import drop_dates, drop_categorical
 
-from fssrp import FSSRPClassifier, FSSRPRegressor
+from fssrp import FSSRPRegressor
 
 if __name__ == '__main__':
     n_jobs = multiprocessing.cpu_count()
-    reps = 30
+    reps = 1
     n_estimators = 10
     subspace_size = "sqrt"
     stream_length = 3000
@@ -73,7 +73,7 @@ if __name__ == '__main__':
         ]),
     }
 
-    metric = metrics.RMSE()
+    metric = metrics.MAE()
 
     columns = [DATASET, APPROACH, REPETITION, SCORE, METRIC]
     experiments = []
@@ -86,7 +86,7 @@ if __name__ == '__main__':
                         args["seed"] = rep
                     dataset = ds()
                     classifier = drop_categorical | drop_dates | StandardScaler()
-                    classifier |= TargetStandardScaler(approach(**args))
+                    classifier |= TargetMinMaxScaler(approach(**args))
                     # results.append(evaluate(dataset, classifier, rep, metric, stream_length))
                     experiments.append([dataset, classifier, rep, metric, stream_length, approach_name])
 

@@ -8,7 +8,7 @@ sns.set()
 
 
 if __name__ == '__main__':
-    filename = "result_regression"
+    filename = "results_classification_baseline_selection"
     filepath = os.path.join(os.getcwd(), "results", filename + ".parquet")
     final_df = pd.read_parquet(filepath)
     avg_df = final_df.copy()
@@ -29,11 +29,12 @@ if __name__ == '__main__':
 
     g = sns.catplot(kind="bar", data=final_df, x=DATASET, y=SCORE, hue=APPROACH,
                     errwidth=1, linewidth=.5)
-    sns.move_legend(g, "upper center", ncol=4, title="")
-    plt.yscale("log")
+    sns.move_legend(g, "upper center", ncol=3, title="")
+    # plt.yscale("log")
     plt.xlabel("")
     plt.ylabel(final_df[METRIC].iloc[0])
     plt.xticks(rotation=30, ha="right")
     plt.tight_layout(pad=.5)
     plt.subplots_adjust(top=.83)
+    plt.ylim(bottom=0.3)
     plt.savefig(os.path.join(os.getcwd(), "figures", filename + ".pdf"))

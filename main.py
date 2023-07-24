@@ -5,10 +5,12 @@ import os
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
+from river.preprocessing import StandardScaler
 from tqdm import tqdm
 import seaborn as sns
 
-from transformations import drop_dates
+from afs import get_alternative_features_baseline, get_alternative_features_classification
+from transformations import drop_dates, AddIrrelevantFeaturesTransformer, AddNoisyFeaturesTransformer
 
 sns.set()
 
@@ -27,11 +29,11 @@ from fssrp import FSSRPClassifier
 
 
 if __name__ == '__main__':
-    n_jobs = multiprocessing.cpu_count()
+    n_jobs = multiprocessing.cpu_count() - 2
     reps = 30
     n_estimators = 10
     subspace_size = "sqrt"
-    stream_length = 1000
+    stream_length = 3000
 
     grace_period = 50
     delta = 0.05
@@ -58,21 +60,27 @@ if __name__ == '__main__':
         "ADWINBoosting": (ADWINBoostingClassifier, [
             {"model": copy.deepcopy(base_model), "n_models": n_estimators, "seed": np.nan}
         ]),
-        "SRP (1)": (SRPClassifier, [
-            {"model": copy.deepcopy(base_model), "n_models": 1,
-             "subspace_size": subspace_size, "seed": np.nan}
-        ]),
-        "FSSRP (1)": (FSSRPClassifier, [
-            {"model": copy.deepcopy(base_model), "n_models": 1,
-             "subspace_size": subspace_size, "seed": np.nan}
-        ]),
+        # "SRP (1)": (SRPClassifier, [
+        #     {"model": copy.deepcopy(base_model), "n_models": 1,
+        #      "subspace_size": subspace_size, "seed": np.nan}
+        # ]),
+        # "FSSRP (1)": (FSSRPClassifier, [
+        #     {"model": copy.deepcopy(base_model), "n_models": 1,
+        #      "subspace_size": subspace_size, "seed": np.nan}
+        # ]),
         "SRP": (SRPClassifier, [
             {"model": copy.deepcopy(base_model), "n_models": n_estimators,
              "subspace_size": subspace_size, "seed": np.nan}
         ]),
         "FSSRP": (FSSRPClassifier, [
             {"model": copy.deepcopy(base_model), "n_models": n_estimators,
-             "subspace_size": subspace_size, "seed": np.nan}
+             "subspace_size": subspace_size, "seed": np.nan,
+             "fs_function": get_alternative_features_classification}
+        ]),
+        "FSSRP (base)": (FSSRPClassifier, [
+            {"model": copy.deepcopy(base_model), "n_models": n_estimators,
+             "subspace_size": subspace_size, "seed": np.nan,
+             "fs_function": get_alternative_features_baseline}
         ]),
     }
 
@@ -88,14 +96,15 @@ if __name__ == '__main__':
                     if "seed" in args:
                         args["seed"] = rep
                     dataset = ds()
-                    classifier = drop_dates | approach(**args)
+                    classifier = drop_dates | StandardScaler() | AddNoisyFeaturesTransformer(seed=rep)
+                    classifier |= approach(**args)
                     print(dataset, classifier, rep, metric)
-                    # results.append(evaluate(dataset, classifier, rep, metric, stream_length))
+                    # results.append(evaluate(dataset, classifier, rep, metric, stream_length, approach_name))
                     experiments.append([dataset, classifier, rep, metric, stream_length, approach_name])
 
     results = run_async(evaluate, experiments, njobs=n_jobs)
     final_df = pd.DataFrame(results, columns=columns)
-    final_df.to_parquet(os.path.join(os.getcwd(), "results", "results_classification.parquet"))
+    final_df.to_parquet(os.path.join(os.getcwd(), "results", "results_classification_baseline_selection.parquet"))
 
     avg_df = final_df.copy()
     avg_df[DATASET] = "Average"
@@ -108,4 +117,4 @@ if __name__ == '__main__':
     plt.xticks(rotation=30, ha="right")
     plt.tight_layout(pad=.5)
     plt.subplots_adjust(top=.85)
-    plt.savefig(os.path.join(os.getcwd(), "figures", "results_classification.pdf"))
+    plt.savefig(os.path.join(os.getcwd(), "figures", "results_classification_baseline_selection.pdf"))
