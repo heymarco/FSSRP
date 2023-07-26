@@ -8,7 +8,7 @@ sns.set()
 
 
 if __name__ == '__main__':
-    filename = "results_classification_baseline_selection"
+    filename = "results_classification_afs_comparison"
     filepath = os.path.join(os.getcwd(), "results", filename + ".parquet")
     final_df = pd.read_parquet(filepath)
     avg_df = final_df.copy()

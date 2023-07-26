@@ -9,7 +9,7 @@ from river.preprocessing import StandardScaler
 from tqdm import tqdm
 import seaborn as sns
 
-from afs import get_alternative_features_baseline, get_alternative_features_classification
+from afs import FSType, AFSType
 from transformations import drop_dates, AddIrrelevantFeaturesTransformer, AddNoisyFeaturesTransformer
 
 sns.set()
@@ -30,10 +30,10 @@ from fssrp import FSSRPClassifier
 
 if __name__ == '__main__':
     n_jobs = multiprocessing.cpu_count() - 2
-    reps = 30
-    n_estimators = 10
+    reps = 5
+    n_estimators = 30
     subspace_size = "sqrt"
-    stream_length = 3000
+    stream_length = 1000
 
     grace_period = 50
     delta = 0.05
@@ -42,9 +42,6 @@ if __name__ == '__main__':
     )
     approaches = {
         NoChangeClassifier.__name__: (NoChangeClassifier, [{}]),
-        # ExtremelyFastDecisionTreeClassifier: [
-        #     {"grace_period": grace_period, "delta": delta}
-        # ],  # DID NOT WORK...
         "HoeffdingTree": (HoeffdingTreeClassifier, [
             {"grace_period": grace_period, "delta": delta}
         ]),
@@ -60,28 +57,24 @@ if __name__ == '__main__':
         "ADWINBoosting": (ADWINBoostingClassifier, [
             {"model": copy.deepcopy(base_model), "n_models": n_estimators, "seed": np.nan}
         ]),
-        # "SRP (1)": (SRPClassifier, [
-        #     {"model": copy.deepcopy(base_model), "n_models": 1,
-        #      "subspace_size": subspace_size, "seed": np.nan}
-        # ]),
-        # "FSSRP (1)": (FSSRPClassifier, [
-        #     {"model": copy.deepcopy(base_model), "n_models": 1,
-        #      "subspace_size": subspace_size, "seed": np.nan}
-        # ]),
+        "SRP (1)": (SRPClassifier, [
+            {"model": copy.deepcopy(base_model), "n_models": 1,
+             "subspace_size": subspace_size, "seed": np.nan}
+        ]),
+        f"FSSRP-1 ({AFSType.WEIGHT})": (FSSRPClassifier, [
+            {"model": copy.deepcopy(base_model), "n_models": 1,
+             "subspace_size": subspace_size, "seed": np.nan,
+             "fstype": FSType.MI, "afstype": AFSType.WEIGHT}
+        ]),
         "SRP": (SRPClassifier, [
             {"model": copy.deepcopy(base_model), "n_models": n_estimators,
              "subspace_size": subspace_size, "seed": np.nan}
         ]),
-        "FSSRP": (FSSRPClassifier, [
+        f"FSSRP-{n_estimators} ({AFSType.WEIGHT})": (FSSRPClassifier, [
             {"model": copy.deepcopy(base_model), "n_models": n_estimators,
              "subspace_size": subspace_size, "seed": np.nan,
-             "fs_function": get_alternative_features_classification}
-        ]),
-        "FSSRP (base)": (FSSRPClassifier, [
-            {"model": copy.deepcopy(base_model), "n_models": n_estimators,
-             "subspace_size": subspace_size, "seed": np.nan,
-             "fs_function": get_alternative_features_baseline}
-        ]),
+             "fstype": FSType.MI, "afstype": AFSType.WEIGHT}
+        ])
     }
 
     metric = metrics.BalancedAccuracy()
@@ -97,8 +90,7 @@ if __name__ == '__main__':
                         args["seed"] = rep
                     dataset = ds()
                     classifier = drop_dates | StandardScaler() | AddNoisyFeaturesTransformer(seed=rep)
-                    classifier |= approach(**args)
-                    print(dataset, classifier, rep, metric)
+                    classifier |= copy.deepcopy(approach(**args))
                     # results.append(evaluate(dataset, classifier, rep, metric, stream_length, approach_name))
                     experiments.append([dataset, classifier, rep, metric, stream_length, approach_name])
 
@@ -117,4 +109,4 @@ if __name__ == '__main__':
     plt.xticks(rotation=30, ha="right")
     plt.tight_layout(pad=.5)
     plt.subplots_adjust(top=.85)
-    plt.savefig(os.path.join(os.getcwd(), "figures", "results_classification_baseline_selection.pdf"))
+    plt.savefig(os.path.join(os.getcwd(), "figures", "results_classification.pdf"))

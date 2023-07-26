@@ -16,7 +16,7 @@ from river.metrics.base import ClassificationMetric, Metric, RegressionMetric
 from river.tree import HoeffdingTreeClassifier, HoeffdingTreeRegressor
 from river.utils.random import poisson
 
-from afs import get_alternative_features_classification, get_alternative_features_regression, get_alternative_features_baseline
+from afs import get_alternative_features, AFSType, FSType, TaskType
 
 
 class BaseFSSRPEnsemble(base.Wrapper, base.Ensemble):
@@ -45,7 +45,10 @@ class BaseFSSRPEnsemble(base.Wrapper, base.Ensemble):
             n_models: int,
             fs_batch_size: int,
             fs_bootstrap_size: float | str,
-            fs_function: callable,
+            fs_relevance_quantile: float,
+            afstype: AFSType,
+            fstype: FSType,
+            tasktype: TaskType,
             subspace_size: int | float | str,
             training_method: str = "patches",
             lam: float = 6.0,
@@ -59,8 +62,6 @@ class BaseFSSRPEnsemble(base.Wrapper, base.Ensemble):
         # List of models is properly initialized later
         super().__init__([])  # type: ignore
         self.model = model  # Not restricted to a specific base estimator.
-        self.fs_batch_size = fs_batch_size
-        self.fs_bootstrap_size = fs_bootstrap_size
         self.n_models = n_models
         self.subspace_size = subspace_size
         self.training_method = training_method
@@ -72,6 +73,7 @@ class BaseFSSRPEnsemble(base.Wrapper, base.Ensemble):
         self.metric = metric
         self.seed = seed
         self._rng = random.Random(self.seed)
+        self._numpy_rng = np.random.default_rng(seed)
 
         self._n_samples_seen = 0
         self._subspaces: list = []
@@ -80,10 +82,15 @@ class BaseFSSRPEnsemble(base.Wrapper, base.Ensemble):
         self._base_learner_class: BaseSRPClassifier | BaseSRPRegressor | None = None
 
         # feature selection related
+        self._relevance_quantile = fs_relevance_quantile
+        self.fs_batch_size = fs_batch_size
+        self.fs_bootstrap_size = fs_bootstrap_size
         self._fs_samples_x: pd.DataFrame = None
         self._fs_samples_y: list = []
         self._uses_random_subspaces = True
-        self._feature_selection_function = fs_function
+        self._tasktype = tasktype
+        self._afstype = afstype
+        self._fstype = fstype
 
     @property
     def _wrapped_model(self):
@@ -301,12 +308,11 @@ class BaseFSSRPEnsemble(base.Wrapper, base.Ensemble):
             relative_size = np.sqrt(dims) / dims
         elif self.subspace_size > 1:
             relative_size = self.subspace_size / dims
-        alt_feature_sets = self._feature_selection_function(data=self._fs_samples_x,
-                                                            labels=np.array(self._fs_samples_y),
-                                                            n_components=self.n_models,
-                                                            relative_size=relative_size,
-                                                            bootstrap_size=self.fs_bootstrap_size,
-                                                            rng=self._rng)
+        alt_feature_sets = get_alternative_features(self._fs_samples_x, np.array(self._fs_samples_y),
+                                                    afstype=self._afstype, fstype=self._fstype, tasktype=self._tasktype,
+                                                    n_components=self.n_models, relative_size=relative_size,
+                                                    bootstrap_size=self.fs_bootstrap_size,
+                                                    relevance_quantile=self._relevance_quantile, rng=self._numpy_rng)
         alt_feature_sets = unique_featuresets(alt_feature_sets)
         if len(alt_feature_sets) == 0:  # if alternative feature selection did not produce results, fall back  to random
             abs_subspace_size = int(relative_size * dims)
@@ -446,7 +452,9 @@ class FSSRPClassifier(BaseFSSRPEnsemble, base.Classifier):
             n_models: int = 10,
             fs_batch_size: int = 100,
             fs_bootstrap_size: float | str = 0.5,
-            fs_function: callable = get_alternative_features_classification,
+            fs_relevance_quantile: float = 0.5,
+            afstype: AFSType = AFSType.WEIGHT,
+            fstype: FSType = FSType.MI,
             subspace_size: int | float | str = 0.6,
             training_method: str = "patches",
             lam: int = 6,
@@ -487,7 +495,10 @@ class FSSRPClassifier(BaseFSSRPEnsemble, base.Classifier):
             n_models=n_models,
             fs_bootstrap_size=fs_bootstrap_size,
             fs_batch_size=fs_batch_size,
-            fs_function=fs_function,
+            fs_relevance_quantile=fs_relevance_quantile,
+            fstype=fstype,
+            afstype=afstype,
+            tasktype=TaskType.CLASSIFICATION,
             subspace_size=subspace_size,
             training_method=training_method,
             lam=lam,
@@ -501,7 +512,6 @@ class FSSRPClassifier(BaseFSSRPEnsemble, base.Classifier):
         )
 
         self._base_learner_class = BaseSRPClassifier  # type: ignore
-        self._feature_selection_function = get_alternative_features_baseline
 
     def predict_proba_one(self, x, **kwargs):
         y_pred = collections.Counter()
@@ -640,7 +650,9 @@ class FSSRPRegressor(BaseFSSRPEnsemble, base.Regressor):
             n_models: int = 10,
             fs_batch_size: int = 100,
             fs_bootstrap_size: float | str = 0.5,
-            fs_function: callable = get_alternative_features_regression,
+            fs_relevance_quantile: float = 0.5,
+            afstype: AFSType = AFSType.WEIGHT,
+            fstype: FSType = FSType.MI,
             subspace_size: int | float | str = 0.6,
             training_method: str = "patches",
             lam: int = 6,
@@ -684,7 +696,10 @@ class FSSRPRegressor(BaseFSSRPEnsemble, base.Regressor):
             n_models=n_models,
             fs_bootstrap_size=fs_bootstrap_size,
             fs_batch_size=fs_batch_size,
-            fs_function=fs_function,
+            fs_relevance_quantile=fs_relevance_quantile,
+            fstype=fstype,
+            afstype=afstype,
+            tasktype=TaskType.REGRESSION,
             subspace_size=subspace_size,
             training_method=training_method,
             lam=lam,
@@ -711,7 +726,6 @@ class FSSRPRegressor(BaseFSSRPEnsemble, base.Regressor):
         self.drift_detection_criteria = drift_detection_criteria
 
         self._base_learner_class = BaseSRPRegressor  # type: ignore
-        self._feature_selection_function = get_alternative_features_regression
 
     def predict_one(self, x, **kwargs):
         y_pred = np.zeros(self.n_models)

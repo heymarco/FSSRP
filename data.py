@@ -8,7 +8,7 @@ _rw_datasets = [
     # datasets.Bananas,  # only 2 features
     datasets.Bikes,
     datasets.ChickWeights,
-    datasets.CreditCard,
+    # datasets.CreditCard,
     datasets.Elec2,
     datasets.HTTP,
     datasets.Higgs,
