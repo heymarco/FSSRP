@@ -9,11 +9,11 @@ import pandas as pd
 
 
 def run_async(function, args_list, njobs, sleep_time_s=1):
-    pool = Pool(njobs)
-    results = {i: pool.apply_async(function, args=args)
-               for i, args in enumerate(args_list)}
-    prev_sum_completed = 0
-    with tqdm(total=len(results)) as pbar:
+    with tqdm(total=len(args_list)) as pbar:
+        pool = Pool(njobs)
+        results = {i: pool.apply_async(function, args=args)
+                   for i, args in enumerate(args_list)}
+        prev_sum_completed = 0
         ready = [future.ready() for future in results.values()]
         while not all(ready):
             sleep(sleep_time_s)
