@@ -34,7 +34,7 @@ if __name__ == '__main__':
     reps = 30
     n_estimators = 30
     subspace_size = "sqrt"
-    stream_length = 3000
+    stream_length = 2000
 
     grace_period = 50
     delta = 0.01

@@ -296,6 +296,7 @@ class BaseFSSRPEnsemble(base.Wrapper, base.Ensemble):
     def _update_samples_for_fs(self, x: dict, y: base.typing.Target):
         self._fs_samples_y.append(y)
         row = pd.DataFrame(x, index=[0])
+        row.columns = row.columns.map(str)
         if self._fs_samples_x is None:
             self._fs_samples_x = row
         else:

@@ -4,29 +4,29 @@ from river import datasets
 from river.datasets import synth
 
 _rw_datasets = [
-    datasets.AirlinePassengers,
-    # datasets.Bananas,  # only 2 features
-    datasets.Bikes,
-    datasets.ChickWeights,
-    # datasets.CreditCard,
-    datasets.Elec2,
-    datasets.HTTP,
-    datasets.Higgs,
-    datasets.ImageSegments,
-    datasets.Insects,
-    datasets.Keystroke,
-    # datasets.MaliciousURL,  # more than 3 million features
+    # datasets.AirlinePassengers,
+    # # datasets.Bananas,  # only 2 features
+    # datasets.Bikes,
+    # datasets.ChickWeights,
+    # # datasets.CreditCard,
+    # datasets.Elec2,
+    # datasets.HTTP,
+    # datasets.Higgs,
+    # datasets.ImageSegments,
+    # datasets.Insects,
+    # datasets.Keystroke,
+    datasets.MaliciousURL,  # more than 3 million features
     # datasets.MovieLens100K,
-    datasets.Music,
-    datasets.Phishing,
+    # datasets.Music,
+    # datasets.Phishing,
     # datasets.Restaurants,
-    # datasets.SMSSpam,  # TODO: missing encoding
-    # datasets.SMTP,  # highly imbalanced (only 0.4% positive labels)
-    datasets.SolarFlare,
-    # datasets.TREC07,  # error loading dataset
-    # datasets.Taxis,  # contains outliers, I think.
-    datasets.TrumpApproval,
-    datasets.WaterFlow
+    # # datasets.SMSSpam,  # TODO: missing encoding
+    # # datasets.SMTP,  # highly imbalanced (only 0.4% positive labels)
+    # datasets.SolarFlare,
+    # # datasets.TREC07,  # error loading dataset
+    # # datasets.Taxis,  # contains outliers, I think.
+    # datasets.TrumpApproval,
+    # datasets.WaterFlow
 ]
 
 _syn_datasets = [

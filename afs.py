@@ -12,7 +12,7 @@ class AFSType(Enum):
     SAMPLE = "sample"
     WEIGHT = "weight"
     ELIMINATE_IRRELEVANT = "elim. irrelevant"
-    SUCCESSIVE_REPLACEMENT = "successive repl."
+    # SUCCESSIVE_REPLACEMENT = "successive repl."
 
 
 class TaskType(Enum):
@@ -33,6 +33,7 @@ def get_alternative_features(data: pd.DataFrame, labels: np.ndarray,
                              relevance_quantile: float,
                              rng: np.random.Generator
                              ) -> list:
+    data = data.fillna(0.0)
     d = data.shape[1]
     if relative_size == "sqrt":
         relative_size = np.sqrt(d) / d
@@ -132,7 +133,7 @@ def _get_alternative_features_eliminate_irrelevant(data: pd.DataFrame,
     relevant_features = data.columns[relevance > quantile]
     relevant_featuresets = []
     for index, fs in enumerate(random_featuresets):
-        fs = np.intersect1d(fs, relevant_features)
+        fs = np.intersect1d(fs, relevant_features,)
         n_removed = fs_size - len(fs)
         if n_removed > 0:
             not_included_relevant_features = np.setdiff1d(relevant_features, fs)
@@ -257,6 +258,10 @@ class SuccessiveReplacementAFS():
         }
 
     def _compute_correlation_mat(self, X: pd.DataFrame):
-        mi_values = [mutual_info_regression(X, X[col]) for col in X.columns]
+        if len(X.columns) > 1000:
+            # do not compute redundancy, otherwise it takes very long -> only look at relevance
+            mi_values = np.ones(shape=(len(X.columns), len(X.columns)), index=X.columns, columns=X.columns)
+        else:
+            mi_values = [mutual_info_regression(X, X[col]) for col in X.columns]
         corr_matrix = pd.DataFrame(mi_values, index=X.columns, columns=X.columns)
         self._feature_correlation_mat = corr_matrix

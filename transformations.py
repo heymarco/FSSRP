@@ -55,7 +55,9 @@ class AddNoisyFeaturesTransformer(Transformer):
         if self._shuffled_keys is None:
             self._shuffled_keys = list(x.keys())
             self._rng.shuffle(self._shuffled_keys)
-        x = {key: x[key] for key in self._shuffled_keys}
+        x = {key: x[key] for key in self._shuffled_keys
+             if key in x  #ugly but necessary
+             }
         return x
 
 
