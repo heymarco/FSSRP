@@ -30,14 +30,14 @@ from fssrp import FSSRPClassifier
 
 if __name__ == '__main__':
     result_filename = "results_classification_afs_comparison"
-    n_jobs = multiprocessing.cpu_count() - 2
+    n_jobs = multiprocessing.cpu_count()
     reps = 30
     n_estimators = 30
     subspace_size = "sqrt"
-    stream_length = 1000
+    stream_length = 3000
 
     grace_period = 50
-    delta = 0.05
+    delta = 0.01
     base_model = HoeffdingTreeClassifier(
         grace_period=grace_period, delta=delta
     )
