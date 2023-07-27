@@ -12,7 +12,7 @@ class AFSType(Enum):
     SAMPLE = "sample"
     WEIGHT = "weight"
     ELIMINATE_IRRELEVANT = "elim. irrelevant"
-    # SUCCESSIVE_REPLACEMENT = "successive repl."
+    SUCCESSIVE_REPLACEMENT = "successive repl."
 
 
 class TaskType(Enum):
@@ -59,15 +59,17 @@ def get_alternative_features(data: pd.DataFrame, labels: np.ndarray,
 
 
 def _mi_feature_selection_classif(X: pd.DataFrame, y, k):
+    d = len(X.columns)
     mi_values = mutual_info_classif(X.to_numpy(), y)
-    quantile = np.quantile(mi_values, 1.0 - k / X.shape[0])
+    quantile = np.quantile(mi_values, 1.0 - k / d)
     indices = [i for i in range(len(mi_values)) if mi_values[i] >= quantile]
     return np.array(X.columns)[indices].tolist()
 
 
 def _mi_feature_selection_regression(X: pd.DataFrame, y, k):
+    d = len(X.columns)
     mi_values = mutual_info_regression(X.to_numpy(), y)
-    quantile = np.quantile(mi_values, 1.0 - k / X.shape[0])
+    quantile = np.quantile(mi_values, 1.0 - k / d)
     indices = [i for i in range(len(mi_values)) if mi_values[i] >= quantile]
     return np.array(X.columns)[indices].tolist()
 
@@ -260,7 +262,7 @@ class SuccessiveReplacementAFS():
     def _compute_correlation_mat(self, X: pd.DataFrame):
         if len(X.columns) > 1000:
             # do not compute redundancy, otherwise it takes very long -> only look at relevance
-            mi_values = np.ones(shape=(len(X.columns), len(X.columns)), index=X.columns, columns=X.columns)
+            mi_values = np.ones(shape=(len(X.columns), len(X.columns)))
         else:
             mi_values = [mutual_info_regression(X, X[col]) for col in X.columns]
         corr_matrix = pd.DataFrame(mi_values, index=X.columns, columns=X.columns)

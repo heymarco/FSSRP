@@ -73,7 +73,8 @@ if __name__ == '__main__':
                     if "seed" in args:
                         args["seed"] = rep
                     dataset = ds()
-                    classifier = drop_dates | StandardScaler() | AddNoisyFeaturesTransformer(seed=rep)
+                    classifier = drop_dates | StandardScaler()
+                    # classifier |= AddNoisyFeaturesTransformer(seed=rep)
                     classifier |= copy.deepcopy(approach(**args))
                     # results.append(evaluate(dataset, classifier, rep, metric, stream_length, approach_name))
                     experiments.append([dataset, classifier, rep, metric, stream_length, approach_name])
