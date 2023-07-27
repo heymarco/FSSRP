@@ -31,10 +31,10 @@ from fssrp import FSSRPClassifier
 if __name__ == '__main__':
     result_filename = "results_classification_afs_comparison"
     n_jobs = multiprocessing.cpu_count()
-    reps = 30
+    reps = 1
     n_estimators = 30
     subspace_size = "sqrt"
-    stream_length = 2000
+    stream_length = 200
 
     grace_period = 50
     delta = 0.01
